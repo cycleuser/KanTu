@@ -1,0 +1,92 @@
+{
+  "description": "Sample data for KanTu testing and demonstration",
+  "version": "1.0",
+  "test_cases": [
+    {
+      "id": "case_001",
+      "name": "Basic image addition",
+      "input": {
+        "operation": "add",
+        "image_type": "base"
+      },
+      "expected_output": {
+        "success": true,
+        "type": "base"
+      }
+    },
+    {
+      "id": "case_002",
+      "name": "Similar image detection",
+      "input": {
+        "operation": "add",
+        "image_type": "similar",
+        "similarity_threshold": 0.85
+      },
+      "expected_output": {
+        "success": true,
+        "type": "delta"
+      }
+    },
+    {
+      "id": "case_003",
+      "name": "Export image",
+      "input": {
+        "operation": "export",
+        "format": "png"
+      },
+      "expected_output": {
+        "success": true,
+        "file_exists": true
+      }
+    },
+    {
+      "id": "case_004",
+      "name": "Find similar images",
+      "input": {
+        "operation": "similar",
+        "threshold": 10
+      },
+      "expected_output": {
+        "success": true,
+        "has_similar": true
+      }
+    }
+  ],
+  "sample_images": {
+    "description": "Generated sample images for testing",
+    "types": [
+      {
+        "name": "base",
+        "description": "Random noise base image (100x100 RGB)",
+        "generator": "numpy.random.randint(0, 255, (100, 100, 3))"
+      },
+      {
+        "name": "similar",
+        "description": "Slightly modified version of base (high SSIM)",
+        "generator": "base with minor pixel changes"
+      },
+      {
+        "name": "different",
+        "description": "Completely different random image",
+        "generator": "numpy.random.randint(0, 255, (100, 100, 3))"
+      }
+    ]
+  },
+  "config_presets": {
+    "conservative": {
+      "similarity_threshold": 0.95,
+      "min_delta_ratio": 0.3,
+      "max_hamming_distance": 5
+    },
+    "balanced": {
+      "similarity_threshold": 0.85,
+      "min_delta_ratio": 0.5,
+      "max_hamming_distance": 10
+    },
+    "aggressive": {
+      "similarity_threshold": 0.70,
+      "min_delta_ratio": 0.7,
+      "max_hamming_distance": 15
+    }
+  }
+}
