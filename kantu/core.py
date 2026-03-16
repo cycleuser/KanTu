@@ -226,25 +226,21 @@ class KanTuCore:
         return result[: target_size[0], : target_size[1]]
 
     def save_delta(self, delta: np.ndarray, delta_id: str) -> str:
-        delta_file = self.delta_path / f"{delta_id}.npy"
-        np.save(str(delta_file), delta)
+        delta_file = self.delta_path / f"{delta_id}.npz"
+        np.savez_compressed(str(delta_file), delta=delta)
         return str(delta_file)
 
     def load_delta(self, delta_id: str) -> np.ndarray:
-        delta_file = self.delta_path / f"{delta_id}.npy"
-        return np.load(str(delta_file))
+        delta_file = self.delta_path / f"{delta_id}.npz"
+        data = np.load(str(delta_file))
+        return data["delta"]
 
     def save_base_image(self, image_path: str, image_id: str) -> str:
-        ext = Path(image_path).suffix.lower()
-        if ext in [".jpg", ".jpeg"]:
-            ext = ".jpg"
-        elif ext == ".png":
-            ext = ".png"
-        else:
-            ext = ".jpg"
-        base_file = self.base_path / f"{image_id}{ext}"
+        base_file = self.base_path / f"{image_id}.png"
         with Image.open(image_path) as img:
-            img.save(base_file, quality=95 if ext == ".jpg" else None)
+            if img.mode != "RGB":
+                img = img.convert("RGB")
+            img.save(base_file, "PNG")
         return str(base_file)
 
     def get_image_dimensions(self, image_path: str) -> tuple[int, int]:
@@ -348,12 +344,9 @@ class KanTuCore:
         if not record:
             return None
         if record["is_base"]:
-            base_path = self.base_path / f"{image_id}.*"
-            import glob
-
-            matches = glob.glob(str(base_path))
-            if matches:
-                with Image.open(matches[0]) as img:
+            base_file = self.base_path / f"{image_id}.png"
+            if base_file.exists():
+                with Image.open(base_file) as img:
                     return np.array(img)
             return None
         base_id = record["base_id"]
@@ -362,16 +355,13 @@ class KanTuCore:
         base_record = self.get_image_record(base_id)
         if not base_record:
             return None
-        base_pattern = str(self.base_path / f"{base_id}.*")
-        import glob
-
-        matches = glob.glob(base_pattern)
-        if not matches:
+        base_file = self.base_path / f"{base_id}.png"
+        if not base_file.exists():
             return None
         delta_id = Path(record["delta_path"]).stem if record["delta_path"] else image_id
         delta = self.load_delta(delta_id)
         target_size = (record["height"], record["width"])
-        return self.apply_pixel_delta(matches[0], delta, target_size)
+        return self.apply_pixel_delta(str(base_file), delta, target_size)
 
     def export_image(self, image_id: str, output_path: str) -> bool:
         arr = self.reconstruct_image(image_id)
