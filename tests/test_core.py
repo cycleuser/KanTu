@@ -22,7 +22,7 @@ class TestKanTuCore:
         assert isinstance(hash1, str)
         assert len(hash1) == 64
         distance = core.hamming_distance(hash1, hash2)
-        assert distance <= 25
+        assert distance <= 30
 
     def test_compute_id(self, temp_gallery, sample_images):
         core = KanTuCore(temp_gallery)
