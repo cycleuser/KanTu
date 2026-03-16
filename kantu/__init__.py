@@ -1,6 +1,6 @@
 """KanTu - Git-like image gallery management with delta encoding."""
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __author__ = "KanTu Developers"
 
 from kantu.api import (
